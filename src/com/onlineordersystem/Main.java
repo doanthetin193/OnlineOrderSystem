@@ -1,21 +1,24 @@
 package com.onlineordersystem;
 
+import java.util.Arrays;
+
 import com.onlineordersystem.core.database.DatabaseConnection;
 import com.onlineordersystem.core.interfaces.PaymentFactory;
 import com.onlineordersystem.core.interfaces.PaymentStrategy;
 import com.onlineordersystem.factory.payment.PaymentFactoryProvider;
 import com.onlineordersystem.factory.product.ProductFactory;
 import com.onlineordersystem.model.inventory.InventoryManager;
+import com.onlineordersystem.model.inventory.StubInventoryManager;
 import com.onlineordersystem.model.order.Order;
-import com.onlineordersystem.model.order.UserObserver;
+import com.onlineordersystem.model.order.OrderObserver;
 import com.onlineordersystem.model.product.Product;
 import com.onlineordersystem.service.order.decorator.GiftWrapDecorator;
 import com.onlineordersystem.service.order.decorator.SpecialPackagingDecorator;
 import com.onlineordersystem.service.product.ProductManager;
+import com.onlineordersystem.service.product.StubProductManager;
 import com.onlineordersystem.service.promotion.DiscountManager;
 import com.onlineordersystem.service.report.ReportGenerator;
-
-import java.util.Arrays;
+import com.onlineordersystem.service.report.StubReportGenerator;
 
 public class Main {
     public static void main(String[] args) {
@@ -29,7 +32,7 @@ public class Main {
         Product shirt = productFactory.createProduct("fashion", "T-Shirt", 29.99);
 
         // Quản lý sản phẩm
-        ProductManager productManager = new ProductManager();
+        ProductManager productManager = new StubProductManager();
         productManager.addProduct(phone);
         productManager.addProduct(shirt);
         System.out.println("Product List: ");
@@ -44,7 +47,7 @@ public class Main {
         }
 
         // Quản lý kho
-        InventoryManager inventoryManager = new InventoryManager();
+        InventoryManager inventoryManager = new StubInventoryManager();
         inventoryManager.addProduct(phone, 10);
         inventoryManager.addProduct(shirt, 20);
 
@@ -54,8 +57,8 @@ public class Main {
 
         // Tạo đơn hàng
         Order order = new Order(inventoryManager, discountManager);
-        // Observer: Thêm người dùng để theo dõi đơn hàng
-        UserObserver user = new UserObserver("John Doe");
+
+        OrderObserver user = new OrderObserver("John Doe");
         order.addObserver(user);
         order.addProduct(phone);
         order.addProduct(shirt);
@@ -81,7 +84,7 @@ public class Main {
         order.processPayment(discountedTotal);
 
         // Báo cáo
-        ReportGenerator reportGenerator = new ReportGenerator();
+        ReportGenerator reportGenerator = new StubReportGenerator();
         double revenue = reportGenerator.calculateRevenue(Arrays.asList(order));
         String bestSeller = reportGenerator.findBestSellingProduct(Arrays.asList(order));
         System.out.println("Total Revenue: $" + revenue);

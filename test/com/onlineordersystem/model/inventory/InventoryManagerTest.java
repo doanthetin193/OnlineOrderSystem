@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class InventoryManagerTest {
-    private InventoryManager inventoryManager;
+    private StubInventoryManager inventoryManager;
     private ProductFactory productFactory;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
 
     @BeforeEach
     public void setUp() {
-        inventoryManager = new InventoryManager();
+        inventoryManager = new StubInventoryManager();
         productFactory = new ProductFactory();
         System.setOut(new PrintStream(outContent));
     }

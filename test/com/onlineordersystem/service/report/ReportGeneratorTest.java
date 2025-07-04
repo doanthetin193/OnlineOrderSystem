@@ -1,7 +1,7 @@
 package com.onlineordersystem.service.report;
 
 import com.onlineordersystem.factory.product.ProductFactory;
-import com.onlineordersystem.model.inventory.InventoryManager;
+import com.onlineordersystem.model.inventory.StubInventoryManager;
 import com.onlineordersystem.model.order.Order;
 import com.onlineordersystem.model.product.Product;
 import com.onlineordersystem.service.promotion.DiscountManager;
@@ -13,18 +13,18 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportGeneratorTest {
-    private ReportGenerator reportGenerator;
+    private StubReportGenerator reportGenerator;
     private ProductFactory productFactory;
-    private InventoryManager inventoryManager;
+    private StubInventoryManager inventoryManager;
     private DiscountManager discountManager;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
 
     @BeforeEach
     public void setUp() {
-        reportGenerator = new ReportGenerator();
+        reportGenerator = new StubReportGenerator();
         productFactory = new ProductFactory();
-        inventoryManager = new InventoryManager();
+        inventoryManager = new StubInventoryManager();
         discountManager = new DiscountManager();
         System.setOut(new PrintStream(outContent));
     }

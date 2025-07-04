@@ -1,34 +1,33 @@
 package com.onlineordersystem.model.inventory;
 
-import com.onlineordersystem.core.database.DatabaseConnection;
 import com.onlineordersystem.model.product.Product;
 
-import java.util.HashMap;
-import java.util.Map;
+public interface InventoryManager {
 
-public class InventoryManager {
-    private Map<String, Integer> inventory = new HashMap<>();
-    private DatabaseConnection dbConnection;
+    /**
+     * Thêm một sản phẩm vào kho với số lượng nhất định.
+     *
+     * @param product  sản phẩm cần thêm
+     * @param quantity số lượng sản phẩm
+     */
+    void addProduct(Product product, int quantity);
 
-    public InventoryManager() {
-        this.dbConnection = DatabaseConnection.getInstance();
-    }
+    /**
+     * Kiểm tra xem kho có đủ số lượng sản phẩm yêu cầu hay không.
+     *
+     * @param product  sản phẩm cần kiểm tra
+     * @param quantity số lượng mong muốn
+     * @return true nếu đủ hàng, ngược lại false
+     */
+    boolean checkAvailability(Product product, int quantity);
 
-    public void addProduct(Product product, int quantity) {
-        inventory.put(product.getName(), quantity);
-        dbConnection.executeQuery("INSERT INTO inventory (name, quantity) VALUES ('" + product.getName() + "', " + quantity + ")");
-    }
-
-    public boolean checkAvailability(Product product, int quantity) {
-        Integer available = inventory.getOrDefault(product.getName(), 0);
-        return available >= quantity;
-    }
-
-    public void updateInventory(Product product, int quantity) {
-        if (!checkAvailability(product, quantity)) {
-            throw new IllegalArgumentException("Not enough stock for " + product.getName());
-        }
-        inventory.put(product.getName(), inventory.get(product.getName()) - quantity);
-        dbConnection.executeQuery("UPDATE inventory SET quantity = " + inventory.get(product.getName()) + " WHERE name = '" + product.getName() + "'");
-    }
+    /**
+     * Cập nhật lại kho sau khi bán/đặt hàng (giảm số lượng tồn kho).
+     *
+     * @param product  sản phẩm cần cập nhật
+     * @param quantity số lượng đã bán/đặt
+     * @throws IllegalArgumentException nếu kho không đủ hàng
+     */
+    void updateInventory(Product product, int quantity);
 }
+

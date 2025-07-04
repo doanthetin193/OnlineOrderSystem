@@ -11,14 +11,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProductManagerTest {
-    private ProductManager productManager;
+    private StubProductManager productManager;
     private ProductFactory productFactory;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
 
     @BeforeEach
     public void setUp() {
-        productManager = new ProductManager();
+        productManager = new StubProductManager();
         productFactory = new ProductFactory();
         System.setOut(new PrintStream(outContent));
     }

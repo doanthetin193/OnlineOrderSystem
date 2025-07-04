@@ -1,7 +1,7 @@
 package com.onlineordersystem.model.order;
 
 import com.onlineordersystem.factory.product.ProductFactory;
-import com.onlineordersystem.model.inventory.InventoryManager;
+import com.onlineordersystem.model.inventory.StubInventoryManager;
 import com.onlineordersystem.model.product.Product;
 import com.onlineordersystem.service.order.decorator.GiftWrapDecorator;
 import com.onlineordersystem.service.order.decorator.SpecialPackagingDecorator;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrderTest {
     private Order order;
-    private InventoryManager inventoryManager;
+    private StubInventoryManager inventoryManager;
     private DiscountManager discountManager;
     private ProductFactory productFactory;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -24,7 +24,7 @@ public class OrderTest {
 
     @BeforeEach
     public void setUp() {
-        inventoryManager = new InventoryManager();
+        inventoryManager = new StubInventoryManager();
         discountManager = new DiscountManager();
         order = new Order(inventoryManager, discountManager);
         productFactory = new ProductFactory();
@@ -42,10 +42,12 @@ public class OrderTest {
     public void testAddProduct() {
         Product product = productFactory.createProduct("electronic", "Smartphone", 100.0);
         inventoryManager.addProduct(product, 10);
+        OrderObserver observer = new OrderObserver("John Doe");
+        order.addObserver(observer);
         order.addProduct(product);
         assertEquals(1, order.getProducts().size());
         assertEquals("Smartphone", order.getProducts().get(0).getName());
-        assertTrue(outContent.toString().contains("Notifying observers with status: Pending (Products: 1)"));
+        assertTrue(outContent.toString().contains("User John Doe received notification: Product Added to Order - Product 'Smartphone' (Price: $100.00) has been added to your order. Total items: 1."));
     }
 
     @Test
@@ -113,9 +115,9 @@ public class OrderTest {
     public void testObserverNotification() {
         Product product = productFactory.createProduct("electronic", "Smartphone", 100.0);
         inventoryManager.addProduct(product, 10);
-        UserObserver observer = new UserObserver("John");
+        OrderObserver observer = new OrderObserver("John");
         order.addObserver(observer);
         order.addProduct(product);
-        assertTrue(outContent.toString().contains("User John received update: Pending (Products: 1)"));
+        assertTrue(outContent.toString().contains("User John received notification"));
     }
 }

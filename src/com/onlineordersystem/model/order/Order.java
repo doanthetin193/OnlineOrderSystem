@@ -1,15 +1,14 @@
 package com.onlineordersystem.model.order;
 
-import com.onlineordersystem.core.interfaces.OrderObserver;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.onlineordersystem.core.interfaces.PaymentStrategy;
 import com.onlineordersystem.model.inventory.InventoryManager;
 import com.onlineordersystem.model.product.Product;
 import com.onlineordersystem.service.promotion.DiscountManager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Order {
+public class Order implements Notifiable {
     private List<Product> products = new ArrayList<>();
     private List<OrderObserver> observers = new ArrayList<>();
     private String status;
@@ -29,12 +28,13 @@ public class Order {
         inventoryManager.checkAvailability(product, 1);
         inventoryManager.updateInventory(product, 1);
         products.add(product);
-        notifyObservers();
+        notifyObservers(createProductAddedNotification(product));
     }
 
     public void setStatus(String status) {
         this.status = status;
-        notifyObservers();
+        
+        notifyObservers(createStatusChangedNotification());
     }
 
     public String getStatus() {
@@ -42,7 +42,9 @@ public class Order {
     }
 
     public void addObserver(OrderObserver observer) {
-        observers.add(observer);
+        if (!observers.contains(observer)) {
+        	observers.add(observer);
+        }
     }
 
     public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
@@ -58,7 +60,7 @@ public class Order {
         if (paymentStrategy != null) {
             paymentStrategy.pay(total);
             setStatus("Paid");
-            this.discountedTotal = total; // Lưu số tiền thanh toán
+            this.discountedTotal = total; 
         } else {
             System.out.println("No payment strategy selected.");
         }
@@ -67,14 +69,13 @@ public class Order {
     public double applyDiscount(String code) {
         double total = getTotal();
         double discounted = discountManager.applyDiscount(total, code);
-        this.discountedTotal = discounted; // Lưu số tiền sau giảm giá
+        this.discountedTotal = discounted; 
         return discounted;
     }
 
-    private void notifyObservers() {
-        System.out.println("Notifying observers with status: " + status + " (Products: " + products.size() + ")");
+    private void notifyObservers(Notification notification) {
         for (OrderObserver observer : new ArrayList<>(observers)) {
-            observer.update(status + " (Products: " + products.size() + ")");
+            observer.update(notification);
         }
     }
 
@@ -89,4 +90,18 @@ public class Order {
     public List<Product> getProducts() {
         return new ArrayList<>(products);
     }
+    
+    private Notification createProductAddedNotification(Product product) {
+        String title = "Product Added to Order";
+        String body = String.format("Product '%s' (Price: $%.2f) has been added to your order. Total items: %d.",
+                product.getName(), product.getPrice(), products.size());
+        return new Notification(title, body, this);
+    }
+    
+    private Notification createStatusChangedNotification() {
+        String title = "Order Status Updated";
+        String body = String.format("Your order status has been updated to '%s'. Total items: %d.", status, products.size());
+        return new Notification(title, body, this);
+    }
+
 }
